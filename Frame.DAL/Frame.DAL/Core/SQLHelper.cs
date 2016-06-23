@@ -5,6 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data;
 using System.Data.SqlClient;
+using System.Text.RegularExpressions;
+using System.Xml;
+using System.Xml.Linq;
 namespace Frame.DAL.Core
 {
     public class SQLHelper
@@ -61,6 +64,18 @@ namespace Frame.DAL.Core
                 return table;
             }
         }
+        
+        //沈伟 
+        public static SqlDataReader ExecuteReader(string connectionString, string cmdText, SqlParameter[] parameters, ref string rtnxml)
+        {
+            SqlCommand cmd = new SqlCommand();
+            using (SqlConnection connection=new SqlConnection(connectionString))
+            {
+                InitCommand(cmd,connection,cmdText,parameters);
+                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                return dataReader;
+            }
+        }
 
         public static void InitCommand(SqlCommand cmd,SqlConnection connection,string cmdText,SqlParameter[] parameters)
         {
@@ -75,6 +90,50 @@ namespace Frame.DAL.Core
         public static string ConvertOutputToXml(SqlParameterCollection cmdParams)
         {
             return null;
+        }
+
+        //沈伟 将sqldatareader转化成xml字符串
+        public static string ConvertReaderToXml(SqlDataReader reader)
+        {
+            string Pattern = @"[\<\>&]";
+            Regex regex = new Regex(Pattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+            XmlDocument doc = new XmlDocument();
+            XmlElement root = doc.CreateElement("read");
+            do
+            {
+                while (reader.Read())
+                {
+                    XmlElement item = doc.CreateElement("item");
+                    for (int ii = 0; ii < reader.FieldCount; ii++)
+                    {
+                        XmlElement node = doc.CreateElement(reader.GetName(ii));
+                        string value = reader.GetValue(ii).ToString();
+                        if (regex.IsMatch(value))
+                        {
+                            node.AppendChild(doc.CreateCDataSection(value));
+                        }
+                        else
+                        {
+                            node.InnerText = value;
+                        }
+                        item.AppendChild(node);
+                    }
+                    root.AppendChild(item);
+                }
+            }
+            while (reader.NextResult());
+            doc.AppendChild(root);
+            return doc.OuterXml;
+        }
+
+        //沈伟 将xml字符串转化为xml对象
+        public static XElement ConvertToXml(string xml)
+        {
+            if (!string.IsNullOrEmpty(xml))
+            {
+                return null;
+            }
+            return XElement.Parse(xml);
         }
 
     }
