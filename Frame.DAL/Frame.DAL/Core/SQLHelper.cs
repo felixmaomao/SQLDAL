@@ -18,6 +18,7 @@ namespace Frame.DAL.Core
             SqlCommand cmd = new SqlCommand();
             using (SqlConnection connection=new SqlConnection(connectionString))
             {
+                connection.Open();
                 InitCommand(cmd,connection,cmdText,parameters);
                 int result = cmd.ExecuteNonQuery();
                 return result;
@@ -29,6 +30,7 @@ namespace Frame.DAL.Core
             SqlCommand cmd = new SqlCommand();
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
+                connection.Open();
                 InitCommand(cmd, connection, cmdText, parameters);
                 int result = cmd.ExecuteNonQuery();
                 rtnxml=ConvertOutputToXml(cmd.Parameters);
@@ -38,9 +40,10 @@ namespace Frame.DAL.Core
 
         public static DataTable ExecuteToDataTable(string connectionString,string cmdText,SqlParameter[] parameters)
         {
-            SqlCommand cmd = new SqlCommand();
+            SqlCommand cmd = new SqlCommand();           
             using (SqlConnection connection = new SqlConnection(connectionString))
-            {                
+            {
+                connection.Open();
                 InitCommand(cmd,connection,cmdText,parameters);
                 SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
                 DataTable table = new DataTable();
@@ -55,6 +58,7 @@ namespace Frame.DAL.Core
             SqlCommand cmd = new SqlCommand();
             using (SqlConnection connection=new SqlConnection(connectionString))
             {
+                connection.Open();
                 InitCommand(cmd,connection,cmdText,parameters);
                 SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
                 DataTable table = new DataTable();
@@ -71,8 +75,9 @@ namespace Frame.DAL.Core
             SqlCommand cmd = new SqlCommand();
             using (SqlConnection connection=new SqlConnection(connectionString))
             {
+                connection.Open();
                 InitCommand(cmd,connection,cmdText,parameters);
-                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                SqlDataReader dataReader = cmd.ExecuteReader();
                 return dataReader;
             }
         }

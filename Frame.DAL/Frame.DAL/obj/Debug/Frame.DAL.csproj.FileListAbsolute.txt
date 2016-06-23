@@ -1,0 +1,5 @@
+F:\Personal\Frame.DAL\Frame.DAL\Frame.DAL\bin\Debug\Frame.DAL.dll
+F:\Personal\Frame.DAL\Frame.DAL\Frame.DAL\bin\Debug\Frame.DAL.pdb
+F:\Personal\Frame.DAL\Frame.DAL\Frame.DAL\obj\Debug\Frame.DAL.csprojResolveAssemblyReference.cache
+F:\Personal\Frame.DAL\Frame.DAL\Frame.DAL\obj\Debug\Frame.DAL.dll
+F:\Personal\Frame.DAL\Frame.DAL\Frame.DAL\obj\Debug\Frame.DAL.pdb
