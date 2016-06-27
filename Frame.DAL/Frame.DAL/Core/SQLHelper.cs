@@ -68,26 +68,7 @@ namespace Frame.DAL.Core
                 return table;
             }
         }
-        
-        //沈伟 
-        //public static SqlDataReader ExecuteReader(string connectionString, string cmdText, SqlParameter[] parameters, ref string rtnxml)
-        //{
-        //    SqlCommand cmd = new SqlCommand();
-        //    cmd.CommandType = CommandType.StoredProcedure;
-        //    using (SqlConnection connection=new SqlConnection(connectionString))
-        //    {
-        //        connection.Open();      
-        //        InitCommand(cmd,connection,cmdText,parameters);
-        //        SqlDataReader dataReader = cmd.ExecuteReader();
-        //        dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-        //        cmd.Parameters.Clear();
-        //        dataReader.Close();
-        //        return dataReader;
-                
-
-        //    }
-        //}
-        //
+          
         //Max
         public static string ExecuteReader(string connectionString, string cmdText, SqlParameter[] parameters, ref string rtnxml)
         {
