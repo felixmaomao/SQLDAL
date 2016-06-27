@@ -24,7 +24,7 @@ namespace Frame.DAL.Core
                 return result;
             }
         }
-
+ 
         public static int ExecuteNonQuery(string connectionString, string cmdText, SqlParameter[] parameters,ref string rtnxml)
         {
             SqlCommand cmd = new SqlCommand();
@@ -70,18 +70,44 @@ namespace Frame.DAL.Core
         }
         
         //沈伟 
-        public static SqlDataReader ExecuteReader(string connectionString, string cmdText, SqlParameter[] parameters, ref string rtnxml)
+        //public static SqlDataReader ExecuteReader(string connectionString, string cmdText, SqlParameter[] parameters, ref string rtnxml)
+        //{
+        //    SqlCommand cmd = new SqlCommand();
+        //    cmd.CommandType = CommandType.StoredProcedure;
+        //    using (SqlConnection connection=new SqlConnection(connectionString))
+        //    {
+        //        connection.Open();      
+        //        InitCommand(cmd,connection,cmdText,parameters);
+        //        SqlDataReader dataReader = cmd.ExecuteReader();
+        //        dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+        //        cmd.Parameters.Clear();
+        //        dataReader.Close();
+        //        return dataReader;
+                
+
+        //    }
+        //}
+        //
+        //Max
+        public static string ExecuteReader(string connectionString, string cmdText, SqlParameter[] parameters, ref string rtnxml)
         {
             SqlCommand cmd = new SqlCommand();
-            using (SqlConnection connection=new SqlConnection(connectionString))
+            cmd.CommandType = CommandType.StoredProcedure;
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                InitCommand(cmd,connection,cmdText,parameters);
-                SqlDataReader dataReader = cmd.ExecuteReader();
-                return dataReader;
+                InitCommand(cmd, connection, cmdText, parameters);
+                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                string rltxml = ConvertReaderToXml(dataReader);
+                rtnxml = ConvertOutputToXml(cmd.Parameters);
+                cmd.Parameters.Clear();
+                dataReader.Close();
+                return rltxml;
+              
+
             }
         }
-
         public static void InitCommand(SqlCommand cmd,SqlConnection connection,string cmdText,SqlParameter[] parameters)
         {
             cmd.Connection = connection;
@@ -104,6 +130,7 @@ namespace Frame.DAL.Core
             Regex regex = new Regex(Pattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
             XmlDocument doc = new XmlDocument();
             XmlElement root = doc.CreateElement("read");
+        
             do
             {
                 while (reader.Read())
@@ -134,7 +161,7 @@ namespace Frame.DAL.Core
         //沈伟 将xml字符串转化为xml对象
         public static XElement ConvertToXml(string xml)
         {
-            if (!string.IsNullOrEmpty(xml))
+            if (string.IsNullOrEmpty(xml))
             {
                 return null;
             }
