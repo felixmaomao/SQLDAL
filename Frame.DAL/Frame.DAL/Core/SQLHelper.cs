@@ -77,7 +77,9 @@ namespace Frame.DAL.Core
             {
                 connection.Open();
                 InitCommand(cmd,connection,cmdText,parameters);
-                SqlDataReader dataReader = cmd.ExecuteReader();
+                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                cmd.Parameters.Clear();
+                dataReader.Close();
                 return dataReader;
             }
         }
