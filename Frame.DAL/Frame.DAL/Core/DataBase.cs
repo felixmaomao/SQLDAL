@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Data;
+using System.Xml.Linq;
+using System.Configuration;
+using System.Data.SqlClient;
 
 namespace Frame.DAL.Core
 {
@@ -14,7 +17,9 @@ namespace Frame.DAL.Core
         #endregion
 
         #region Constructors
-        public DataBase() { }
+        public DataBase() {
+
+        }
         public DataBase(string name,string connectionString)
         {
             this._name = name;
@@ -27,14 +32,16 @@ namespace Frame.DAL.Core
 
         public void AddProcedure(StoredProcedure procedure)
         {
-            if (!_procedureList.Exists(p=>p.Code==procedure.Code))
+            if (!_procedureList.Exists(p=>p.Name==procedure.Name))
             {
                 _procedureList.Add(procedure);
             }
         }
 
-
-
+        public XElement ExecuteRtnXml(string procedureName,ref string rtnXml,params object[] paramsValue)
+        {
+            return null;
+        }
 
         #endregion
 

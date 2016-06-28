@@ -10,9 +10,7 @@ namespace Frame.DAL.Core
 {
     public class StoredProcedure
     {
-        private string _name;
-        private string _code;
-        private string _connectionString;
+        private string _name;       
         private SqlParameter[] _sqlParameters;
 
         public string Name
@@ -21,27 +19,10 @@ namespace Frame.DAL.Core
             set { _name = value; }
         }
 
-        public string Code
+        public StoredProcedure(string name)
         {
-            get { return _code; }
-            set { _code = value; }
+            this._name = name;    
         }
-
-        public StoredProcedure(string name,string code,string connectionString)
-        {
-            this._name = name;
-            this._code = code;
-            this._connectionString = connectionString;
-        }
-
-        public DataTable ExecuteToDataTable()
-        {
-            return SQLHelper.ExecuteToDataTable(_connectionString,_code,_sqlParameters);
-        }
-
-        public DataTable ExecuteToDataTable(ref string rtnxml)
-        {
-            return SQLHelper.ExecuteToDataTable(_connectionString,_code,_sqlParameters,ref rtnxml);
-        }
+     
     }
 }
