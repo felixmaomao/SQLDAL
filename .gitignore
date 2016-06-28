@@ -43,3 +43,5 @@ Temporary Items
 .apdisk
 *.pdb
 *.dll
+/Frame.DAL/Frame.DAL/bin/
+/Frame.DAL/Frame.DAL/obj/
