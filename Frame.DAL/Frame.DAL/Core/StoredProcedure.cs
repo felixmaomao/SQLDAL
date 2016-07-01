@@ -18,10 +18,15 @@ namespace Frame.DAL.Core
             get { return _name; }
             set { _name = value; }
         }
-
-        public StoredProcedure(string name)
+        public SqlParameter[] SqlParameters
         {
-            this._name = name;    
+            get { return _sqlParameters; }
+            set { _sqlParameters = value; }
+        }
+
+        public void Execute()
+        {
+
         }
      
     }
