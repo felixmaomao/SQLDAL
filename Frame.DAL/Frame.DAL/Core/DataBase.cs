@@ -18,13 +18,16 @@ namespace Frame.DAL.Core
         #endregion
 
         #region Constructors
-        public DataBase() {
+        public DataBase(string filePathName) {
+            this._filePath= AppDomain.CurrentDomain.BaseDirectory + ConfigurationManager.AppSettings[filePathName].ToString();
             EnsureProceListInitialized();
         }
-        public DataBase(string name,string connectionString)
+
+        public DataBase(string name,string connectionString,string filePathName)
         {
             this._name = name;
             this._connectionString = connectionString;
+            this._filePath= AppDomain.CurrentDomain.BaseDirectory + ConfigurationManager.AppSettings[filePathName].ToString();
             EnsureProceListInitialized();
         }
         #endregion
@@ -32,9 +35,8 @@ namespace Frame.DAL.Core
         #region Methods
 
         public void EnsureProceListInitialized()
-        {
-            string xmlpath = AppDomain.CurrentDomain.BaseDirectory + ConfigurationManager.AppSettings["FilePathData"].ToString();
-            XDocument doc = XDocument.Load(xmlpath);
+        {            
+            XDocument doc = XDocument.Load(_filePath);
             string connstr = doc.Root.Element("database").Attribute("connectionString").Value;
             XElement root = doc.Root;
             //存储过程节点
@@ -54,10 +56,9 @@ namespace Frame.DAL.Core
                     parameters[i] = sqlParam;
                 }
                 StoredProcedure procedure = new StoredProcedure { SqlParameters = parameters };
-                _procedureList.Add(procedure);
+                AddProcedure(procedure);
             }                               
         }
-
 
         public void AddProcedure(StoredProcedure procedure)
         {
@@ -68,12 +69,15 @@ namespace Frame.DAL.Core
         }
 
         public XElement ExecuteRtnXml(string procedureName,ref string rtnXml,params object[] paramsValue)
-        {
-            //find the procedure 
-            //prepare the procedure
-            //execute the procedure
+        {          
             StoredProcedure procedure = FindProcedureByName(procedureName);
-            procedure.Execute();           
+            return procedure.ExecuteRtnXml(ref rtnXml,paramsValue);           
+        }
+
+        public string Execute(string procedureName, ref string rtnXml,params object[] paramsValue)
+        {
+            StoredProcedure procedure = FindProcedureByName(procedureName);
+            return procedure.Execute(ref rtnXml,paramsValue);
         }
 
         public StoredProcedure FindProcedureByName(string procedureName)
@@ -82,7 +86,6 @@ namespace Frame.DAL.Core
         }
                         
         #endregion
-
 
     }
 }

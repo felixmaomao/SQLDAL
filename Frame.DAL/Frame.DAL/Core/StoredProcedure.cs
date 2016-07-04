@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data;
 using System.Data.SqlClient;
-
+using System.Xml.Linq;
 namespace Frame.DAL.Core
 {
     public class StoredProcedure
@@ -18,16 +18,23 @@ namespace Frame.DAL.Core
             get { return _name; }
             set { _name = value; }
         }
+
         public SqlParameter[] SqlParameters
         {
             get { return _sqlParameters; }
             set { _sqlParameters = value; }
         }
 
-        public void Execute()
+        public string Execute(ref string rtnxml,params object[] paramsValue)
         {
-
+            return null;
         }
-     
+
+        public XElement ExecuteRtnXml(ref string rtnxml,params object[] paramsValue)
+        {
+            return null;
+        }
+        
+
     }
 }
