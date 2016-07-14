@@ -24,17 +24,6 @@ namespace Frame.DAL.Core
             get { return _sqlParameters; }
             set { _sqlParameters = value; }
         }
-
-        public string Execute(ref string rtnxml,params object[] paramsValue)
-        {
-            return null;
-        }
-
-        public XElement ExecuteRtnXml(ref string rtnxml,params object[] paramsValue)
-        {
-            return null;
-        }
-        
-
+                      
     }
 }

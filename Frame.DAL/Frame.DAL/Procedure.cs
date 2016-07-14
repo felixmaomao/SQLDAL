@@ -19,8 +19,8 @@ namespace Frame.DAL
             _dbMain  = new DataBase("FilePathData");
             _dbFrame = new DataBase("FilePathFrame");
 
-            _dict.Add(1,_dbMain);
-            _dict.Add(2,_dbFrame);
+            _dict.Add(0,_dbMain);
+            _dict.Add(1,_dbFrame);
         }
                     
         public static DataTable SelectToDataTable(int dbNo,params object[] paramValues)
@@ -33,14 +33,15 @@ namespace Frame.DAL
             return null;
         }
 
-        public static XElement ExecuteToXml(int dbNo,params object[] paramValues)
+        public static string ExecuteToXml(int dbNo,string procedureName,params object[] paramValues)
         {
+            string rtnxml = string.Empty;
             DataBase db = _dict[dbNo];
             if (db!=null)
             {
-                               
+                db.ExecuteRtnXml(procedureName,ref rtnxml, paramValues);                
             }
-            return null;
+            return rtnxml;
         }
 
         public static string ExecuteToString(int dbNo,string procedureName,params object[] paramsValues)

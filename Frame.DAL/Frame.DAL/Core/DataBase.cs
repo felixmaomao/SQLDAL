@@ -22,14 +22,7 @@ namespace Frame.DAL.Core
             this._filePath= AppDomain.CurrentDomain.BaseDirectory + ConfigurationManager.AppSettings[filePathName].ToString();
             EnsureProceListInitialized();
         }
-
-        public DataBase(string name,string connectionString,string filePathName)
-        {
-            this._name = name;
-            this._connectionString = connectionString;
-            this._filePath= AppDomain.CurrentDomain.BaseDirectory + ConfigurationManager.AppSettings[filePathName].ToString();
-            EnsureProceListInitialized();
-        }
+       
         #endregion
 
         #region Methods
@@ -38,11 +31,12 @@ namespace Frame.DAL.Core
         {            
             XDocument doc = XDocument.Load(_filePath);
             string connstr = doc.Root.Element("database").Attribute("connectionString").Value;
+            this._connectionString = connstr;
             XElement root = doc.Root;
             //存储过程节点
             IEnumerable<XElement> suitableElements = root.Element("database").Elements();
             //是否需要缓存优化？
-            foreach (XElement proceItem in suitableElements.Elements())
+            foreach (XElement proceItem in suitableElements)
             {
                 IEnumerable<Parameter> sqlParameters = from item in proceItem.Elements()
                                                        select new Parameter(item.Attribute("name").Value, item.Attribute("type").Value, Convert.ToInt32(item.Attribute("size").Value), Convert.ToInt32(item.Attribute("direction").Value));
@@ -55,7 +49,7 @@ namespace Frame.DAL.Core
                     sqlParam.Direction = param.Direction;
                     parameters[i] = sqlParam;
                 }
-                StoredProcedure procedure = new StoredProcedure { SqlParameters = parameters };
+                StoredProcedure procedure = new StoredProcedure { SqlParameters = parameters, Name = proceItem.Attribute("name").Value };
                 AddProcedure(procedure);
             }                               
         }
@@ -68,22 +62,37 @@ namespace Frame.DAL.Core
             }
         }
 
-        public XElement ExecuteRtnXml(string procedureName,ref string rtnXml,params object[] paramsValue)
+        public int ExecuteRtnXml(string procedureName,ref string rtnXml,params object[] paramsValue)
         {          
             StoredProcedure procedure = FindProcedureByName(procedureName);
-            return procedure.ExecuteRtnXml(ref rtnXml,paramsValue);           
+            FillInTheProcedureWithValues(procedure,paramsValue);
+            int result=SQLHelper.ExecuteNonQuery(this._connectionString,procedureName,procedure.SqlParameters,ref rtnXml);
+            return result;
         }
 
         public string Execute(string procedureName, ref string rtnXml,params object[] paramsValue)
         {
             StoredProcedure procedure = FindProcedureByName(procedureName);
-            return procedure.Execute(ref rtnXml,paramsValue);
+            FillInTheProcedureWithValues(procedure,paramsValue);
+            return string.Empty;
         }
 
         public StoredProcedure FindProcedureByName(string procedureName)
         {
             return _procedureList.First(p => p.Name == procedureName);
         }
+
+        public void FillInTheProcedureWithValues(StoredProcedure procedure,params object[] paramsValue)
+        {
+            //按顺序填充存储过程所需参数值
+            if (paramsValue.Length>0)
+            {
+                for (int i = 0; i < procedure.SqlParameters.Count(); i++)
+                {
+                    procedure.SqlParameters[i].Value = paramsValue[i];
+                }
+            }            
+       }
                         
         #endregion
 
