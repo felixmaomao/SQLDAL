@@ -32,19 +32,8 @@ namespace Frame.DAL
             }
             return null;
         }
-
-        public static string ExecuteToXml(int dbNo,string procedureName,params object[] paramValues)
-        {
-            string rtnxml = string.Empty;
-            DataBase db = _dict[dbNo];
-            if (db!=null)
-            {
-                db.ExecuteRtnXml(procedureName,ref rtnxml, paramValues);                
-            }
-            return rtnxml;
-        }
-
-        public static string ExecuteToString(int dbNo,string procedureName,params object[] paramsValues)
+       
+        public static XElement ExecuteToXml(int dbNo,string procedureName,params object[] paramsValues)
         {
             DataBase db;
             string rtnxml = string.Empty;

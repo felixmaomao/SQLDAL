@@ -21,19 +21,18 @@ namespace Frame.DAL.Core
         public DataBase(string filePathName) {
             this._filePath= AppDomain.CurrentDomain.BaseDirectory + ConfigurationManager.AppSettings[filePathName].ToString();
             EnsureProceListInitialized();
-        }
-       
+        }       
         #endregion
 
-        #region Methods
+        #region CommonMethods
 
         public void EnsureProceListInitialized()
         {            
             XDocument doc = XDocument.Load(_filePath);
-            string connstr = doc.Root.Element("database").Attribute("connectionString").Value;
-            this._connectionString = connstr;
+            this._name = doc.Root.Element("database").Attribute("name").Value;
+            this._connectionString = doc.Root.Element("database").Attribute("connectionString").Value;           
             XElement root = doc.Root;
-            //存储过程节点
+            //存储过程所有节点
             IEnumerable<XElement> suitableElements = root.Element("database").Elements();
             //是否需要缓存优化？
             foreach (XElement proceItem in suitableElements)
@@ -62,39 +61,41 @@ namespace Frame.DAL.Core
             }
         }
 
-        public int ExecuteRtnXml(string procedureName,ref string rtnXml,params object[] paramsValue)
-        {          
-            StoredProcedure procedure = FindProcedureByName(procedureName);
-            FillInTheProcedureWithValues(procedure,paramsValue);
-            int result=SQLHelper.ExecuteNonQuery(this._connectionString,procedureName,procedure.SqlParameters,ref rtnXml);
-            return result;
-        }
-
-        public string Execute(string procedureName, ref string rtnXml,params object[] paramsValue)
-        {
-            StoredProcedure procedure = FindProcedureByName(procedureName);
-            FillInTheProcedureWithValues(procedure,paramsValue);
-            return string.Empty;
-        }
-
         public StoredProcedure FindProcedureByName(string procedureName)
         {
             return _procedureList.First(p => p.Name == procedureName);
         }
 
-        public void FillInTheProcedureWithValues(StoredProcedure procedure,params object[] paramsValue)
+        public void FillInTheProcedureWithValues(StoredProcedure procedure, params object[] paramsValue)
         {
             //按顺序填充存储过程所需参数值
-            if (paramsValue.Length>0)
+            if (paramsValue.Length > 0)
             {
                 for (int i = 0; i < procedure.SqlParameters.Count(); i++)
                 {
                     procedure.SqlParameters[i].Value = paramsValue[i];
                 }
-            }            
-       }
-                        
+            }
+        }
+
         #endregion
 
+        #region Methods
+        public int ExecuteRtnXml(string procedureName, ref string rtnXml, params object[] paramsValue)
+        {
+            StoredProcedure procedure = FindProcedureByName(procedureName);
+            FillInTheProcedureWithValues(procedure, paramsValue);
+            int result = SQLHelper.ExecuteNonQuery(this._connectionString, procedureName, procedure.SqlParameters, ref rtnXml);
+            return result;
+        }
+
+        public XElement Execute(string procedureName, ref string rtnXml, params object[] paramsValue)
+        {
+            StoredProcedure procedure = FindProcedureByName(procedureName);
+            FillInTheProcedureWithValues(procedure, paramsValue);            
+            XElement result = SQLHelper.ExecuteReader(this._connectionString, procedureName, procedure.SqlParameters, ref rtnXml);
+            return result;
+        }
+        #endregion
     }
 }

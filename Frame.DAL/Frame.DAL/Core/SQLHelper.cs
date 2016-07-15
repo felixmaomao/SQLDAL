@@ -12,7 +12,7 @@ namespace Frame.DAL.Core
 {
     public class SQLHelper
     {
-
+        #region Methods
         public static int ExecuteNonQuery(string connectionString,string cmdText,SqlParameter[] parameters)
         {
             SqlCommand cmd = new SqlCommand();
@@ -68,9 +68,8 @@ namespace Frame.DAL.Core
                 return table;
             }
         }
-          
-        //Max
-        public static string ExecuteReader(string connectionString, string cmdText, SqlParameter[] parameters, ref string rtnxml)
+
+        public static XElement ExecuteReader(string connectionString,string cmdText,SqlParameter[] parameters)
         {
             SqlCommand cmd = new SqlCommand();
             cmd.CommandType = CommandType.StoredProcedure;
@@ -79,14 +78,32 @@ namespace Frame.DAL.Core
                 connection.Open();
                 InitCommand(cmd, connection, cmdText, parameters);
                 SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
+                string rltxml = ConvertReaderToXml(dataReader);                
+                cmd.Parameters.Clear();
+                dataReader.Close();
+                return ConvertToXml(rltxml);
+            }
+        }
+        //Max
+        public static XElement ExecuteReader(string connectionString, string cmdText, SqlParameter[] parameters, ref string rtnxml)
+        {
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandType = CommandType.StoredProcedure;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                InitCommand(cmd, connection, cmdText, parameters);
+                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
                 string rltxml = ConvertReaderToXml(dataReader);
                 rtnxml = ConvertOutputToXml(cmd.Parameters);
                 cmd.Parameters.Clear();
                 dataReader.Close();
-                return rltxml;
+                return ConvertToXml(rltxml);
             }
         }
+        #endregion
+
+        #region CommonMethods
         public static void InitCommand(SqlCommand cmd,SqlConnection connection,string cmdText,SqlParameter[] parameters)
         {
             cmd.Connection = connection;
@@ -146,6 +163,6 @@ namespace Frame.DAL.Core
             }
             return XElement.Parse(xml);
         }
-
+        #endregion
     }
 }
