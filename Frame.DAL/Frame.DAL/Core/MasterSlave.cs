@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Frame.LOG
+namespace Frame.DAL.Core
 {
-    class RedisLogger
+    public enum MasterSlave
     {
-
+        Master,
+        Slave
     }
 }

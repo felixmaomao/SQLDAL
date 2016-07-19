@@ -14,12 +14,14 @@ namespace Frame.DAL.Core
         private string _name;
         private string _connectionString = string.Empty;
         private string _filePath = string.Empty;
+        private MasterSlave _masterSlave = MasterSlave.Master;
         private List<StoredProcedure> _procedureList = new List<StoredProcedure>();
         #endregion
 
         #region Constructors
-        public DataBase(string filePathName) {
+        public DataBase(string filePathName,MasterSlave masterSlave=MasterSlave.Master) {
             this._filePath= AppDomain.CurrentDomain.BaseDirectory + ConfigurationManager.AppSettings[filePathName].ToString();
+            this._masterSlave = masterSlave;
             EnsureProceListInitialized();
         }       
         #endregion
@@ -29,11 +31,23 @@ namespace Frame.DAL.Core
         public void EnsureProceListInitialized()
         {            
             XDocument doc = XDocument.Load(_filePath);
-            this._name = doc.Root.Element("database").Attribute("name").Value;
-            this._connectionString = doc.Root.Element("database").Attribute("connectionString").Value;           
             XElement root = doc.Root;
+            this._name = root.Element("database").Attribute("name").Value.Trim();
+            this._connectionString = root.Element("database").Attribute("connectionString").Value.Trim();
+            #region 主从库分离
+            if (this._masterSlave == MasterSlave.Slave)
+            {
+                //必须要有从库节点             
+                XElement slave = root.Element("database").Element("slave");
+                if (slave != null)
+                {
+                    this._name = slave.Attribute("name").Value.Trim();
+                    this._connectionString = slave.Attribute("connectionString").Value.Trim();
+                }
+            }
+            #endregion      
             //存储过程所有节点
-            IEnumerable<XElement> suitableElements = root.Element("database").Elements();
+            IEnumerable<XElement> suitableElements = root.Element("database").Elements("procedures");
             //是否需要缓存优化？
             foreach (XElement proceItem in suitableElements)
             {
@@ -71,7 +85,7 @@ namespace Frame.DAL.Core
             //按顺序填充存储过程所需参数值
             if (paramsValue.Length > 0)
             {
-                for (int i = 0; i < procedure.SqlParameters.Count(); i++)
+                for (int i = 0; i < paramsValue.Count(); i++)
                 {
                     procedure.SqlParameters[i].Value = paramsValue[i];
                 }
@@ -81,19 +95,27 @@ namespace Frame.DAL.Core
         #endregion
 
         #region Methods
-        public int ExecuteRtnXml(string procedureName, ref string rtnXml, params object[] paramsValue)
+        public int ExecuteNonQuery(string procedureName, ref XElement outXml, params object[] paramsValue)
         {
             StoredProcedure procedure = FindProcedureByName(procedureName);
             FillInTheProcedureWithValues(procedure, paramsValue);
-            int result = SQLHelper.ExecuteNonQuery(this._connectionString, procedureName, procedure.SqlParameters, ref rtnXml);
+            int result = SQLHelper.ExecuteNonQuery(this._connectionString, procedureName, procedure.SqlParameters, ref outXml);
             return result;
         }
-
+     
         public XElement Execute(string procedureName, ref string rtnXml, params object[] paramsValue)
         {
             StoredProcedure procedure = FindProcedureByName(procedureName);
             FillInTheProcedureWithValues(procedure, paramsValue);            
             XElement result = SQLHelper.ExecuteReader(this._connectionString, procedureName, procedure.SqlParameters, ref rtnXml);
+            return result;
+        }
+
+        public XElement Execute(string procedureName,params object[] paramsValue)
+        {
+            StoredProcedure procedure = FindProcedureByName(procedureName);
+            FillInTheProcedureWithValues(procedure,paramsValue);
+            XElement result = SQLHelper.ExecuteReader(this._connectionString, procedureName, procedure.SqlParameters);
             return result;
         }
         #endregion

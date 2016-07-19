@@ -12,20 +12,9 @@ namespace Frame.DAL.Core
 {
     public class SQLHelper
     {
-        #region Methods
-        public static int ExecuteNonQuery(string connectionString,string cmdText,SqlParameter[] parameters)
-        {
-            SqlCommand cmd = new SqlCommand();
-            using (SqlConnection connection=new SqlConnection(connectionString))
-            {
-                connection.Open();
-                InitCommand(cmd,connection,cmdText,parameters);
-                int result = cmd.ExecuteNonQuery();
-                return result;
-            }
-        }
+        #region Methods      
  
-        public static int ExecuteNonQuery(string connectionString, string cmdText, SqlParameter[] parameters,ref string rtnxml)
+        public static int ExecuteNonQuery(string connectionString, string cmdText, SqlParameter[] parameters,ref XElement outxml)
         {
             SqlCommand cmd = new SqlCommand();
             using (SqlConnection connection = new SqlConnection(connectionString))
@@ -33,7 +22,8 @@ namespace Frame.DAL.Core
                 connection.Open();
                 InitCommand(cmd, connection, cmdText, parameters);
                 int result = cmd.ExecuteNonQuery();
-                rtnxml=ConvertOutputToXml(cmd.Parameters);
+                string xml=ConvertOutputToXml(cmd.Parameters);
+                outxml = ConvertToXml(xml);
                 return result;
             }
         }
@@ -69,7 +59,7 @@ namespace Frame.DAL.Core
             }
         }
 
-        public static XElement ExecuteReader(string connectionString,string cmdText,SqlParameter[] parameters)
+        public static XElement ExecuteReader(string connectionString, string cmdText, SqlParameter[] parameters)
         {
             SqlCommand cmd = new SqlCommand();
             cmd.CommandType = CommandType.StoredProcedure;
@@ -116,7 +106,15 @@ namespace Frame.DAL.Core
 
         public static string ConvertOutputToXml(SqlParameterCollection cmdParams)
         {
-            return null;
+            StringBuilder sb = new StringBuilder();
+            sb.Append("<Root>");
+            foreach (SqlParameter param in cmdParams)
+            {
+                if (param.Direction == ParameterDirection.Output)
+                    sb.AppendFormat("<{0}>{1}</{0}>", param.ParameterName.Replace("@", ""), param.Value);
+            }
+            sb.Append("</Root>");
+            return sb.ToString();
         }
 
         //沈伟 将sqldatareader转化成xml字符串

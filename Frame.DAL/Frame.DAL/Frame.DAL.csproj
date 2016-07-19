@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\DataBase.cs" />
+    <Compile Include="Core\MasterSlave.cs" />
     <Compile Include="Core\Parameter.cs" />
     <Compile Include="Core\SQLHelper.cs" />
     <Compile Include="Core\StoredProcedure.cs" />
